@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/crates/oxc_linter/oxlintrc.schema.json",
+  "plugins": ["typescript", "react"],
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "react/no-children-prop": "warn",
+    "react/no-danger": "warn"
+  }
+}
