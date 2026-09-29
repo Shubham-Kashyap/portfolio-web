@@ -1,0 +1,217 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 3rem;
+  color: #ededef;
+  font-family: var(--font-inter), sans-serif;
+  user-select: none;
+}
+
+/* Top HUD Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.systemBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem;
+  background: rgba(14, 18, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseDot 2.4s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.titleGroup {
+  text-align: center;
+}
+
+.developerName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.developerRole {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  color: #818cf8;
+  letter-spacing: 0.06em;
+  margin-top: 0.15rem;
+}
+
+.sceneTracker {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  padding: 0.4rem 0.9rem;
+  background: rgba(14, 18, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+}
+
+/* Center-Left Narrative Card */
+.narrativeContainer {
+  max-width: 480px;
+  pointer-events: auto;
+}
+
+.narrativeCard {
+  background: rgba(8, 10, 18, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #6366f1;
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sceneSubtitle {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #818cf8;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.sceneHeadline {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #ffffff;
+  margin-bottom: 0.85rem;
+}
+
+.sceneDescription {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+/* Bottom Scroll Bar & Prompt */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.timelineIndicator {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 180px;
+}
+
+.timelineLabels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.timelineTrack {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timelineFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #38bdf8);
+  border-radius: 2px;
+  transition: width 0.1s ease-out;
+}
+
+.scrollPrompt {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+}
+
+.scrollIcon {
+  width: 18px;
+  height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.scrollIcon::after {
+  content: '';
+  width: 3px;
+  height: 6px;
+  background-color: #818cf8;
+  border-radius: 2px;
+  position: absolute;
+  top: 5px;
+  animation: scrollWheel 1.8s infinite ease-in-out;
+}
+
+@keyframes scrollWheel {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 1.5rem 1.25rem;
+  }
+  .sceneHeadline {
+    font-size: 1.4rem;
+  }
+  .sceneDescription {
+    font-size: 0.85rem;
+  }
+  .narrativeCard {
+    padding: 1.25rem 1.4rem;
+  }
+  .timelineIndicator {
+    width: 120px;
+  }
+}
