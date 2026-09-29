@@ -70,6 +70,10 @@ export default class SceneManager {
     this.scrollTimeline.updateScrollProgress(progress);
   }
 
+  public setProject(index: number): void {
+    this.scrollTimeline.setManualProject(index);
+  }
+
   public onPointerMove(normalizedX: number, normalizedY: number): void {
     this.cameraDirector.setPointer(normalizedX, normalizedY);
   }

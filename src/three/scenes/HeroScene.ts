@@ -12,7 +12,8 @@ export default class HeroScene {
 
   private monitorLeftLight!: THREE.PointLight;
   private monitorRightLight!: THREE.PointLight;
-  private rimLight!: THREE.DirectionalLight;
+  private laptopLight!: THREE.PointLight;
+  private windowKeyLight!: THREE.DirectionalLight;
 
   private geometries: THREE.BufferGeometry[] = [];
   private materials: THREE.Material[] = [];
@@ -20,7 +21,6 @@ export default class HeroScene {
   constructor() {
     this.group = new THREE.Group();
 
-    // 1. Instantiate Core Actors and Environment
     this.protagonist = new StylizedProtagonist();
     this.workstation = new Workstation();
     this.citySkyline = new CitySkyline();
@@ -29,10 +29,7 @@ export default class HeroScene {
     this.group.add(this.workstation.group);
     this.group.add(this.protagonist.group);
 
-    // 2. Build Room Architecture & Floor
-    this.buildRoom();
-
-    // 3. Establish Cinematic Lighting
+    this.buildOfficeRoom();
     this.setupLighting();
   }
 
@@ -46,95 +43,89 @@ export default class HeroScene {
     return material;
   }
 
-  private buildRoom(): void {
-    // Dark reflective tech floor
-    const floorGeo = this.trackGeometry(new THREE.PlaneGeometry(32, 32));
+  private buildOfficeRoom(): void {
+    const floorGeo = this.trackGeometry(new THREE.PlaneGeometry(36, 36));
     const floorMat = this.trackMaterial(new THREE.MeshStandardMaterial({
-      color: 0x030408,
-      roughness: 0.65,
-      metalness: 0.3,
+      color: 0x070b14,
+      roughness: 0.35,
+      metalness: 0.4,
     }));
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0;
     this.group.add(floor);
 
-    // Subtle technical grid overlay
-    const grid = new THREE.GridHelper(32, 32, 0x1d2440, 0x090e1a);
+    const grid = new THREE.GridHelper(36, 36, 0x1e2c4f, 0x0b1324);
     grid.position.y = 0.005;
     this.group.add(grid);
 
-    // Architectural Window Frame & Mullions at the room boundary (Z: -6)
+    // Panoramic window frame overlooking the city
     const frameMat = this.trackMaterial(new THREE.MeshStandardMaterial({
-      color: 0x0b0d14,
-      roughness: 0.4,
-      metalness: 0.7,
+      color: 0x141a29,
+      roughness: 0.3,
+      metalness: 0.8,
     }));
 
-    // Horizontal window sill / transom
-    const transomGeo = this.trackGeometry(new THREE.BoxGeometry(24, 0.15, 0.2));
+    const transomGeo = this.trackGeometry(new THREE.BoxGeometry(26, 0.14, 0.2));
     const bottomSill = new THREE.Mesh(transomGeo, frameMat);
-    bottomSill.position.set(0, 0.1, -6);
+    bottomSill.position.set(0, 0.1, -6.5);
     this.group.add(bottomSill);
 
     const topHeader = new THREE.Mesh(transomGeo, frameMat);
-    topHeader.position.set(0, 6.5, -6);
+    topHeader.position.set(0, 6.8, -6.5);
     this.group.add(topHeader);
 
-    // Vertical structural mullions
-    const mullionGeo = this.trackGeometry(new THREE.BoxGeometry(0.18, 6.5, 0.2));
-    const mullionPositions = [-7, -3.5, 0, 3.5, 7];
+    const mullionGeo = this.trackGeometry(new THREE.BoxGeometry(0.16, 6.8, 0.18));
+    const mullionPositions = [-7.5, -3.8, 0, 3.8, 7.5];
     mullionPositions.forEach(x => {
       const mullion = new THREE.Mesh(mullionGeo, frameMat);
-      mullion.position.set(x, 3.3, -6);
+      mullion.position.set(x, 3.4, -6.5);
       this.group.add(mullion);
     });
   }
 
   private setupLighting(): void {
-    // Deep midnight ambient fill
-    const ambientLight = new THREE.AmbientLight(0x0e1428, 0.75);
+    const ambientLight = new THREE.AmbientLight(0x1a263d, 0.85);
     this.group.add(ambientLight);
 
-    // Key soft directional light from high front-right
-    const keyLight = new THREE.DirectionalLight(0x94a3b8, 0.8);
-    keyLight.position.set(4, 8, 4);
-    this.group.add(keyLight);
+    this.windowKeyLight = new THREE.DirectionalLight(0xbde0fe, 1.4);
+    this.windowKeyLight.position.set(2, 6, -6);
+    this.group.add(this.windowKeyLight);
 
-    // Purple/Magenta rim light behind the developer for silhouette separation
-    this.rimLight = new THREE.DirectionalLight(0x7c3aed, 1.2);
-    this.rimLight.position.set(-2, 4, -4);
-    this.group.add(this.rimLight);
+    const rimLight = new THREE.DirectionalLight(0x60a5fa, 0.9);
+    rimLight.position.set(-4, 4, 3);
+    this.group.add(rimLight);
 
-    // Monitor screen glows (simulating light emission onto character & keyboard)
-    this.monitorLeftLight = new THREE.PointLight(0x38bdf8, 1.6, 3.5, 1.8);
-    this.monitorLeftLight.position.set(-0.8, 1.5, -1.0);
+    this.monitorLeftLight = new THREE.PointLight(0x38bdf8, 1.4, 3.2, 1.8);
+    this.monitorLeftLight.position.set(-0.82, 1.55, -0.9);
     this.group.add(this.monitorLeftLight);
 
-    this.monitorRightLight = new THREE.PointLight(0x818cf8, 1.4, 3.5, 1.8);
-    this.monitorRightLight.position.set(0.8, 1.5, -1.0);
+    this.monitorRightLight = new THREE.PointLight(0x2dd4bf, 1.3, 3.2, 1.8);
+    this.monitorRightLight.position.set(0.82, 1.55, -0.9);
     this.group.add(this.monitorRightLight);
+
+    this.laptopLight = new THREE.PointLight(0x93c5fd, 0.9, 1.8, 2.0);
+    this.laptopLight.position.set(0, 1.25, -0.65);
+    this.group.add(this.laptopLight);
   }
 
   public update(deltaTime: number, elapsedTime: number): void {
     this.protagonist.updateIdle(elapsedTime);
     this.workstation.update(deltaTime);
+    this.citySkyline.update(deltaTime);
   }
 
-  /**
-   * Orchestrates scene elements according to scroll progression [0..1]
-   */
+  public setProject(index: number): void {
+    this.workstation.setProject(index);
+  }
+
   public setTimelineProgress(progress: number): void {
-    // 1. Lower coffee mug naturally toward the desk
-    this.protagonist.setCoffeeProgress(progress * 1.5);
+    this.protagonist.setTimelineProgress(progress);
 
-    // 2. Direct protagonist's attention toward active workstation
-    this.protagonist.setHeadAttention(progress);
-
-    // 3. Modulate monitor light intensities as workstation activates
-    const intensityMultiplier = 1.0 + progress * 0.8;
-    this.monitorLeftLight.intensity = 1.6 * intensityMultiplier;
-    this.monitorRightLight.intensity = 1.4 * intensityMultiplier;
+    const intensityMultiplier = 1.0 + progress * 0.7;
+    this.monitorLeftLight.intensity = 1.4 * intensityMultiplier;
+    this.monitorRightLight.intensity = 1.3 * intensityMultiplier;
+    this.laptopLight.intensity = 0.9 * intensityMultiplier;
   }
 
   public dispose(): void {

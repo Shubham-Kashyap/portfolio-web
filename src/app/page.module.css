@@ -1,7 +1,7 @@
 .main {
   position: relative;
   width: 100vw;
-  min-height: 300vh; /* Virtual narrative distance for Scene 01 -> Transition 01 */
+  min-height: 480vh; /* Smooth narrative timeline spanning Scene 01, 02, and 03 */
   background-color: transparent;
 }
 

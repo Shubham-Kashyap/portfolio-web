@@ -1,27 +1,76 @@
 import * as THREE from 'three';
 
-const DESK_SURFACE_COLOR = 0x0c0e14;
-const DESK_FRAME_COLOR = 0x181a24;
-const SCREEN_BEZEL_COLOR = 0x07080c;
-const KEYBOARD_BASE_COLOR = 0x161822;
+const DESK_SURFACE_COLOR = 0x090b10;
+const DESK_FRAME_COLOR = 0x161822;
+const SCREEN_BEZEL_COLOR = 0x050608;
+const LAPTOP_CHASSIS_COLOR = 0x1b1f2b;
+
+export interface ProjectData {
+  id: string;
+  name: string;
+  category: string;
+  problem: string;
+  solution: string;
+  tech: string[];
+  role: string;
+  impact: string;
+}
+
+export const PROJECTS: ProjectData[] = [
+  {
+    id: 'aether-engine',
+    name: 'AETHER ENGINE',
+    category: 'Cloud Infrastructure / Distributed Systems',
+    problem: 'High cross-region replication latency and inconsistent state synchronization in global microservices.',
+    solution: 'Engineered a decentralized edge mesh network utilizing zero-copy protocols and optimistic consensus verification.',
+    tech: ['Rust', 'TypeScript', 'gRPC', 'Redis', 'Kafka', 'Docker'],
+    role: 'Lead Systems Architect',
+    impact: '85% drop in cross-region latency, 1.4M events/sec throughput with 99.999% uptime.',
+  },
+  {
+    id: 'synapse-ai',
+    name: 'SYNAPSE WORKFLOW OS',
+    category: 'Autonomous AI Orchestration',
+    problem: 'Multi-agent LLM systems failing unpredictably without verifiable state machines or audit checkpoints.',
+    solution: 'Designed a deterministic directed acyclic graph (DAG) runtime with sandboxed execution and self-healing memory pools.',
+    tech: ['Next.js', 'TypeScript', 'Python', 'Vector DB', 'PostgreSQL', 'Tailwind'],
+    role: 'Full-Stack & AI Engineer',
+    impact: '99.4% task completion rate, automating 400+ complex workflows across enterprise pipelines.',
+  },
+  {
+    id: 'nebula-fin',
+    name: 'NEBULA TRADING TERMINAL',
+    category: 'High-Frequency FinTech Platform',
+    problem: 'Laggy charting engines and websocket bottlenecks causing execution slippage during peak market volatility.',
+    solution: 'Built a GPU-accelerated WebGL telemetry visualizer and sub-millisecond order execution gateway.',
+    tech: ['TypeScript', 'WebGL', 'Three.js', 'WebSockets', 'RxJS', 'Node.js'],
+    role: 'Principal Frontend Architect',
+    impact: 'Sub-2ms render loop, processing $18M+ in daily transaction volume with zero frame drops.',
+  },
+];
 
 export default class Workstation {
   public group: THREE.Group;
 
-  // Screen materials for dynamic intensity transitions
   private codeScreenMaterial!: THREE.MeshBasicMaterial;
-  private terminalScreenMaterial!: THREE.MeshBasicMaterial;
+  private archScreenMaterial!: THREE.MeshBasicMaterial;
+  private laptopScreenMaterial!: THREE.MeshBasicMaterial;
 
-  // Offscreen 2D canvases for high-resolution dynamic screen rendering
   private codeCanvas!: HTMLCanvasElement;
   private codeCtx!: CanvasRenderingContext2D;
   private codeTexture!: THREE.CanvasTexture;
 
-  private terminalCanvas!: HTMLCanvasElement;
-  private terminalCtx!: CanvasRenderingContext2D;
-  private terminalTexture!: THREE.CanvasTexture;
+  private archCanvas!: HTMLCanvasElement;
+  private archCtx!: CanvasRenderingContext2D;
+  private archTexture!: THREE.CanvasTexture;
 
+  private laptopCanvas!: HTMLCanvasElement;
+  private laptopCtx!: CanvasRenderingContext2D;
+  private laptopTexture!: THREE.CanvasTexture;
+
+  private currentProjectIndex = 0;
   private blinkTimer = 0;
+  private animTimer = 0;
   private geometries: THREE.BufferGeometry[] = [];
   private materials: THREE.Material[] = [];
 
@@ -31,10 +80,10 @@ export default class Workstation {
     this.initScreenCanvases();
     this.buildDesk();
     this.buildMonitors();
-    this.buildPeripherals();
-    this.renderScreens(true);
+    this.buildOpenLaptop();
+    this.renderAllScreens(true);
 
-    this.group.position.set(0, 0, -1.1);
+    this.group.position.set(0, 0, -1.05);
   }
 
   private trackGeometry<T extends THREE.BufferGeometry>(geometry: T): T {
@@ -48,77 +97,62 @@ export default class Workstation {
   }
 
   private initScreenCanvases(): void {
-    // 1024x576 (16:9) crisp offscreen canvases
     this.codeCanvas = document.createElement('canvas');
     this.codeCanvas.width = 1024;
     this.codeCanvas.height = 576;
     this.codeCtx = this.codeCanvas.getContext('2d')!;
     this.codeTexture = new THREE.CanvasTexture(this.codeCanvas);
 
-    this.terminalCanvas = document.createElement('canvas');
-    this.terminalCanvas.width = 1024;
-    this.terminalCanvas.height = 576;
-    this.terminalCtx = this.terminalCanvas.getContext('2d')!;
-    this.terminalTexture = new THREE.CanvasTexture(this.terminalCanvas);
+    this.archCanvas = document.createElement('canvas');
+    this.archCanvas.width = 1024;
+    this.archCanvas.height = 576;
+    this.archCtx = this.archCanvas.getContext('2d')!;
+    this.archTexture = new THREE.CanvasTexture(this.archCanvas);
 
-    this.codeScreenMaterial = this.trackMaterial(new THREE.MeshBasicMaterial({
-      map: this.codeTexture,
-    }));
+    this.laptopCanvas = document.createElement('canvas');
+    this.laptopCanvas.width = 512;
+    this.laptopCanvas.height = 320;
+    this.laptopCtx = this.laptopCanvas.getContext('2d')!;
+    this.laptopTexture = new THREE.CanvasTexture(this.laptopCanvas);
 
-    this.terminalScreenMaterial = this.trackMaterial(new THREE.MeshBasicMaterial({
-      map: this.terminalTexture,
-    }));
+    this.codeScreenMaterial = this.trackMaterial(new THREE.MeshBasicMaterial({ map: this.codeTexture }));
+    this.archScreenMaterial = this.trackMaterial(new THREE.MeshBasicMaterial({ map: this.archTexture }));
+    this.laptopScreenMaterial = this.trackMaterial(new THREE.MeshBasicMaterial({ map: this.laptopTexture }));
   }
 
   private buildDesk(): void {
     const topMat = this.trackMaterial(new THREE.MeshStandardMaterial({
       color: DESK_SURFACE_COLOR,
-      roughness: 0.35,
-      metalness: 0.2,
+      roughness: 0.25,
+      metalness: 0.35,
     }));
 
     const frameMat = this.trackMaterial(new THREE.MeshStandardMaterial({
       color: DESK_FRAME_COLOR,
-      roughness: 0.6,
-      metalness: 0.7,
+      roughness: 0.5,
+      metalness: 0.8,
     }));
 
-    // Main tabletop
-    const topGeo = this.trackGeometry(new THREE.BoxGeometry(3.6, 0.08, 1.6));
+    const topGeo = this.trackGeometry(new THREE.BoxGeometry(3.8, 0.08, 1.8));
     const top = new THREE.Mesh(topGeo, topMat);
     top.position.set(0, 0.96, 0);
     this.group.add(top);
 
-    // Left and right metal legs
-    const legGeo = this.trackGeometry(new THREE.BoxGeometry(0.08, 0.96, 1.4));
-    
+    const legGeo = this.trackGeometry(new THREE.BoxGeometry(0.1, 0.96, 1.5));
     const leftLeg = new THREE.Mesh(legGeo, frameMat);
-    leftLeg.position.set(-1.65, 0.48, 0);
+    leftLeg.position.set(-1.75, 0.48, 0);
     this.group.add(leftLeg);
 
     const rightLeg = new THREE.Mesh(legGeo, frameMat);
-    rightLeg.position.set(1.65, 0.48, 0);
+    rightLeg.position.set(1.75, 0.48, 0);
     this.group.add(rightLeg);
-
-    // Rear reinforcement crossbar
-    const crossbarGeo = this.trackGeometry(new THREE.BoxGeometry(3.2, 0.06, 0.06));
-    const crossbar = new THREE.Mesh(crossbarGeo, frameMat);
-    crossbar.position.set(0, 0.5, -0.6);
-    this.group.add(crossbar);
-
-    // Subtle desk backlight LED strip along the back edge
-    const ledGeo = this.trackGeometry(new THREE.BoxGeometry(3.2, 0.02, 0.02));
-    const ledMat = this.trackMaterial(new THREE.MeshBasicMaterial({ color: 0x4f46e5 }));
-    const ledStrip = new THREE.Mesh(ledGeo, ledMat);
-    ledStrip.position.set(0, 0.95, -0.79);
-    this.group.add(ledStrip);
   }
 
   private buildMonitors(): void {
     const bezelMat = this.trackMaterial(new THREE.MeshStandardMaterial({
       color: SCREEN_BEZEL_COLOR,
-      roughness: 0.4,
-      metalness: 0.8,
+      roughness: 0.3,
+      metalness: 0.85,
     }));
 
     const standMat = this.trackMaterial(new THREE.MeshStandardMaterial({
@@ -127,225 +161,316 @@ export default class Workstation {
       metalness: 0.8,
     }));
 
-    const monitorWidth = 1.45;
-    const monitorHeight = 0.85;
+    const monitorWidth = 1.48;
+    const monitorHeight = 0.88;
     const monitorDepth = 0.04;
 
     const screenGeo = this.trackGeometry(new THREE.PlaneGeometry(monitorWidth - 0.04, monitorHeight - 0.04));
     const bodyGeo = this.trackGeometry(new THREE.BoxGeometry(monitorWidth, monitorHeight, monitorDepth));
 
-    // Monitor 1 (Left - Code Editor)
-    const monitor1Group = new THREE.Group();
-    const body1 = new THREE.Mesh(bodyGeo, bezelMat);
-    monitor1Group.add(body1);
-
+    // Monitor 1 (Left - Code)
+    const mon1Group = new THREE.Group();
+    mon1Group.add(new THREE.Mesh(bodyGeo, bezelMat));
     const screen1 = new THREE.Mesh(screenGeo, this.codeScreenMaterial);
     screen1.position.z = monitorDepth / 2 + 0.002;
-    monitor1Group.add(screen1);
+    mon1Group.add(screen1);
+    mon1Group.position.set(-0.82, 1.54, -0.32);
+    mon1Group.rotation.y = 0.16;
+    this.group.add(mon1Group);
 
-    monitor1Group.position.set(-0.78, 1.52, -0.2);
-    monitor1Group.rotation.y = 0.18;
-    this.group.add(monitor1Group);
+    const stand1 = new THREE.Mesh(this.trackGeometry(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 12)), standMat);
+    stand1.position.set(-0.82, 1.25, -0.42);
+    this.group.add(stand1);
 
-    // Monitor 2 (Right - System Dashboard / Preview)
-    const monitor2Group = new THREE.Group();
-    const body2 = new THREE.Mesh(bodyGeo, bezelMat);
-    monitor2Group.add(body2);
-
-    const screen2 = new THREE.Mesh(screenGeo, this.terminalScreenMaterial);
+    // Monitor 2 (Right - Active Project Showcase)
+    const mon2Group = new THREE.Group();
+    mon2Group.add(new THREE.Mesh(bodyGeo, bezelMat));
+    const screen2 = new THREE.Mesh(screenGeo, this.archScreenMaterial);
     screen2.position.z = monitorDepth / 2 + 0.002;
-    monitor2Group.add(screen2);
+    mon2Group.add(screen2);
+    mon2Group.position.set(0.82, 1.54, -0.32);
+    mon2Group.rotation.y = -0.16;
+    this.group.add(mon2Group);
 
-    monitor2Group.position.set(0.78, 1.52, -0.2);
-    monitor2Group.rotation.y = -0.18;
-    this.group.add(monitor2Group);
-
-    // Monitor arms / dual desk mount
-    const armGeo = this.trackGeometry(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 16));
-    const arm = new THREE.Mesh(armGeo, standMat);
-    arm.position.set(0, 1.25, -0.4);
-    this.group.add(arm);
-
-    const baseMountGeo = this.trackGeometry(new THREE.BoxGeometry(0.25, 0.06, 0.25));
-    const baseMount = new THREE.Mesh(baseMountGeo, standMat);
-    baseMount.position.set(0, 1.01, -0.4);
-    this.group.add(baseMount);
+    const stand2 = new THREE.Mesh(this.trackGeometry(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 12)), standMat);
+    stand2.position.set(0.82, 1.25, -0.42);
+    this.group.add(stand2);
   }
 
-  private buildPeripherals(): void {
-    const keyboardMat = this.trackMaterial(new THREE.MeshStandardMaterial({
-      color: KEYBOARD_BASE_COLOR,
-      roughness: 0.5,
+  private buildOpenLaptop(): void {
+    const chassisMat = this.trackMaterial(new THREE.MeshStandardMaterial({
+      color: LAPTOP_CHASSIS_COLOR,
+      roughness: 0.35,
+      metalness: 0.8,
     }));
-    const keyGlowMat = this.trackMaterial(new THREE.MeshBasicMaterial({ color: 0x6366f1 }));
-    const mouseMat = this.trackMaterial(new THREE.MeshStandardMaterial({
-      color: 0x0f1118,
-      roughness: 0.3,
-    }));
+    const keybMat = this.trackMaterial(new THREE.MeshBasicMaterial({ color: 0x1e2436 }));
 
-    // Mechanical keyboard body
-    const kbGeo = this.trackGeometry(new THREE.BoxGeometry(0.65, 0.02, 0.22));
-    const keyboard = new THREE.Mesh(kbGeo, keyboardMat);
-    keyboard.position.set(-0.15, 1.01, 0.25);
-    this.group.add(keyboard);
+    const laptopGroup = new THREE.Group();
 
-    // Illuminated key row accent
-    const keysGeo = this.trackGeometry(new THREE.BoxGeometry(0.6, 0.008, 0.18));
-    const keys = new THREE.Mesh(keysGeo, keyGlowMat);
-    keys.position.set(-0.15, 1.025, 0.25);
-    this.group.add(keys);
+    const baseGeo = this.trackGeometry(new THREE.BoxGeometry(0.72, 0.018, 0.48));
+    const base = new THREE.Mesh(baseGeo, chassisMat);
+    laptopGroup.add(base);
 
-    // Precision ergonomics mouse
-    const mouseGeo = this.trackGeometry(new THREE.BoxGeometry(0.1, 0.03, 0.16));
-    const mouse = new THREE.Mesh(mouseGeo, mouseMat);
-    mouse.position.set(0.45, 1.015, 0.25);
-    this.group.add(mouse);
+    const kbGeo = this.trackGeometry(new THREE.BoxGeometry(0.64, 0.006, 0.26));
+    const kb = new THREE.Mesh(kbGeo, keybMat);
+    kb.position.set(0, 0.008, -0.06);
+    laptopGroup.add(kb);
 
-    // Extended desk mat
-    const matGeo = this.trackGeometry(new THREE.BoxGeometry(1.5, 0.005, 0.55));
-    const matMaterial = this.trackMaterial(new THREE.MeshStandardMaterial({
-      color: 0x08090f,
-      roughness: 0.9,
-    }));
-    const deskMat = new THREE.Mesh(matGeo, matMaterial);
-    deskMat.position.set(0.05, 1.002, 0.22);
-    this.group.add(deskMat);
+    const padGeo = this.trackGeometry(new THREE.BoxGeometry(0.24, 0.004, 0.12));
+    const pad = new THREE.Mesh(padGeo, chassisMat);
+    pad.position.set(0, 0.007, 0.14);
+    laptopGroup.add(pad);
+
+    const lidGroup = new THREE.Group();
+    lidGroup.position.set(0, 0.009, -0.24);
+
+    const lidGeo = this.trackGeometry(new THREE.BoxGeometry(0.72, 0.44, 0.014));
+    const lid = new THREE.Mesh(lidGeo, chassisMat);
+    lid.position.set(0, 0.22, 0);
+    lidGroup.add(lid);
+
+    const lScreenGeo = this.trackGeometry(new THREE.PlaneGeometry(0.68, 0.4));
+    const lScreen = new THREE.Mesh(lScreenGeo, this.laptopScreenMaterial);
+    lScreen.position.set(0, 0.22, 0.008);
+    lidGroup.add(lScreen);
+
+    lidGroup.rotation.x = -0.38;
+    laptopGroup.add(lidGroup);
+
+    laptopGroup.position.set(0, 1.01, 0.22);
+    this.group.add(laptopGroup);
   }
 
-  private renderScreens(showCursor: boolean): void {
-    // --- Render Screen 1: TypeScript IDE Code Editor ---
-    const ctx1 = this.codeCtx;
-    ctx1.fillStyle = '#080a12';
-    ctx1.fillRect(0, 0, 1024, 576);
+  public setProject(index: number): void {
+    const clamped = Math.max(0, Math.min(PROJECTS.length - 1, index));
+    if (this.currentProjectIndex !== clamped) {
+      this.currentProjectIndex = clamped;
+      this.renderAllScreens(true);
+    }
+  }
 
-    // IDE Header tab bar
-    ctx1.fillStyle = '#101322';
-    ctx1.fillRect(0, 0, 1024, 46);
-    ctx1.fillStyle = '#222744';
-    ctx1.fillRect(10, 6, 220, 36);
-    ctx1.fillStyle = '#6366f1';
-    ctx1.fillRect(10, 40, 220, 3);
+  private renderAllScreens(showCursor: boolean): void {
+    this.renderCodeScreen(showCursor);
+    this.renderProjectShowcaseScreen();
+    this.renderLaptopScreen();
+  }
 
-    ctx1.font = 'bold 18px "Roboto Mono", monospace';
-    ctx1.fillStyle = '#EDEDEF';
-    ctx1.fillText('SceneOrchestrator.ts', 24, 28);
+  private renderCodeScreen(showCursor: boolean): void {
+    const ctx = this.codeCtx;
+    ctx.fillStyle = '#080c16';
+    ctx.fillRect(0, 0, 1024, 576);
 
-    // Code lines with realistic syntax coloring
+    ctx.fillStyle = '#111726';
+    ctx.fillRect(0, 0, 1024, 48);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(16, 8, 240, 34);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(16, 40, 240, 2);
+
+    ctx.font = 'bold 18px "Roboto Mono", monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`${PROJECTS[this.currentProjectIndex].id}.core.ts`, 36, 30);
+
+    const currentProj = PROJECTS[this.currentProjectIndex];
     const codeLines = [
-      { num: '01', tokens: [{ text: 'import', col: '#c084fc' }, { text: ' { Engine, Camera, Timeline } ', col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "three-cinema";', col: '#38bdf8' }] },
-      { num: '02', tokens: [{ text: 'import', col: '#c084fc' }, { text: ' type { StoryState } ', col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "./types";', col: '#38bdf8' }] },
-      { num: '03', tokens: [] },
-      { num: '04', tokens: [{ text: 'export class ', col: '#60a5fa' }, { text: 'DeveloperUniverse ', col: '#facc15' }, { text: 'implements ', col: '#c084fc' }, { text: 'StoryState {', col: '#e2e8f0' }] },
-      { num: '05', tokens: [{ text: '  private readonly ', col: '#60a5fa' }, { text: 'vision: ', col: '#38bdf8' }, { text: 'string = ', col: '#e2e8f0' }, { text: '"Cinematic Craft";', col: '#4ade80' }] },
-      { num: '06', tokens: [{ text: '  public isCrafting: ', col: '#60a5fa' }, { text: 'boolean = ', col: '#e2e8f0' }, { text: 'true;', col: '#f87171' }] },
-      { num: '07', tokens: [] },
-      { num: '08', tokens: [{ text: '  async onScrollAdvance', col: '#38bdf8' }, { text: '(progress: ', col: '#e2e8f0' }, { text: 'number', col: '#facc15' }, { text: '): Promise<void> {', col: '#e2e8f0' }] },
-      { num: '09', tokens: [{ text: '    await this.camera.smoothPush(progress);', col: '#94a3b8' }] },
-      { num: '10', tokens: [{ text: '    this.workstation.illuminate(0.95);', col: '#94a3b8' }] },
-      { num: '11', tokens: [{ text: '  }', col: '#e2e8f0' }] },
-      { num: '12', tokens: [{ text: '}', col: '#e2e8f0' }] },
+      { num: '01', tokens: [{ text: 'import', col: '#c084fc' }, { text: ` { ${currentProj.name.replace(/\s+/g, '')} } `, col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "@/architecture";', col: '#38bdf8' }] },
+      { num: '02', tokens: [{ text: 'export class ', col: '#60a5fa' }, { text: 'ProductionPipeline ', col: '#facc15' }, { text: '{', col: '#e2e8f0' }] },
+      { num: '03', tokens: [{ text: '  readonly status = ', col: '#60a5fa' }, { text: '"OPERATIONAL";', col: '#4ade80' }] },
+      { num: '04', tokens: [{ text: `  readonly impact = "${currentProj.impact.slice(0, 42)}...";`, col: '#94a3b8' }] },
+      { num: '05', tokens: [{ text: '  async execute(): Promise<Metrics> {', col: '#e2e8f0' }] },
+      { num: '06', tokens: [{ text: '    const nodes = await Mesh.discoverEndpoints();', col: '#94a3b8' }] },
+      { num: '07', tokens: [{ text: '    return await this.dispatch(nodes);', col: '#94a3b8' }] },
+      { num: '08', tokens: [{ text: '  }', col: '#e2e8f0' }] },
+      { num: '09', tokens: [{ text: '}', col: '#e2e8f0' }] },
     ];
 
-    ctx1.font = '20px "Roboto Mono", monospace';
-    const startY = 88;
-    const lineHeight = 36;
-
+    ctx.font = '20px "Roboto Mono", monospace';
+    const startY = 96;
     codeLines.forEach((line, index) => {
-      const y = startY + index * lineHeight;
-      // Line number
-      ctx1.fillStyle = '#3b4261';
-      ctx1.fillText(line.num, 20, y);
+      const y = startY + index * 40;
+      ctx.fillStyle = '#334155';
+      ctx.fillText(line.num, 24, y);
 
-      // Code tokens
-      let currentX = 80;
+      let currentX = 84;
       line.tokens.forEach(token => {
-        ctx1.fillStyle = token.col;
-        ctx1.fillText(token.text, currentX, y);
-        currentX += ctx1.measureText(token.text).width;
+        ctx.fillStyle = token.col;
+        ctx.fillText(token.text, currentX, y);
+        currentX += ctx.measureText(token.text).width;
       });
 
-      // Cursor at line 10
-      if (line.num === '10' && showCursor) {
-        ctx1.fillStyle = '#818cf8';
-        ctx1.fillRect(currentX + 4, y - 22, 10, 26);
+      if (line.num === '07' && showCursor) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(currentX + 6, y - 22, 10, 26);
       }
     });
 
     this.codeTexture.needsUpdate = true;
+  }
 
-    // --- Render Screen 2: System Terminal & Health Metrics ---
-    const ctx2 = this.terminalCtx;
-    ctx2.fillStyle = '#06070c';
-    ctx2.fillRect(0, 0, 1024, 576);
+  private renderProjectShowcaseScreen(): void {
+    const ctx = this.archCtx;
+    const proj = PROJECTS[this.currentProjectIndex];
 
-    // Terminal header
-    ctx2.fillStyle = '#0f121d';
-    ctx2.fillRect(0, 0, 1024, 46);
-    ctx2.fillStyle = '#f43f5e';
-    ctx2.beginPath();
-    ctx2.arc(24, 23, 6, 0, Math.PI * 2);
-    ctx2.fill();
-    ctx2.fillStyle = '#fbbf24';
-    ctx2.beginPath();
-    ctx2.arc(44, 23, 6, 0, Math.PI * 2);
-    ctx2.fill();
-    ctx2.fillStyle = '#22c55e';
-    ctx2.beginPath();
-    ctx2.arc(64, 23, 6, 0, Math.PI * 2);
-    ctx2.fill();
+    ctx.fillStyle = '#060a14';
+    ctx.fillRect(0, 0, 1024, 576);
 
-    ctx2.font = '16px "Roboto Mono", monospace';
-    ctx2.fillStyle = '#64748b';
-    ctx2.fillText('build-pipeline — zsh — 80x24', 96, 28);
+    // Title Bar with dynamic project name
+    ctx.fillStyle = '#0d1527';
+    ctx.fillRect(0, 0, 1024, 48);
+    ctx.font = 'bold 18px "Roboto Mono", monospace';
+    ctx.fillStyle = '#2dd4bf';
+    ctx.fillText(`LIVE PROJECT PREVIEW [${this.currentProjectIndex + 1}/3] // ${proj.name}`, 36, 30);
 
-    // Terminal lines
-    const terminalLogs = [
-      { tag: '[INFO]', col: '#38bdf8', text: 'Initializing high-fidelity 3D viewport...' },
-      { tag: '[OK]', col: '#4ade80', text: 'WebGL 2.0 context compiled (Shader pipeline ready)' },
-      { tag: '[PERF]', col: '#818cf8', text: 'Target Framerate: 60fps | VRAM Allocation: 24MB' },
-      { tag: '[SYNC]', col: '#facc15', text: 'Scroll-linked timeline listener synchronized' },
-      { tag: '[BUILD]', col: '#c084fc', text: 'Projects: 3 loaded, Tech Puzzle: 2 missing slots' },
-      { tag: '[STATUS]', col: '#22c55e', text: 'Ready. Waiting for user timeline progression.' },
+    if (this.currentProjectIndex === 0) {
+      // --- Project 1: Cloud Mesh Architecture Network Map ---
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.5;
+
+      ctx.beginPath();
+      ctx.moveTo(220, 240);
+      ctx.lineTo(512, 240);
+      ctx.lineTo(512, 160);
+      ctx.lineTo(760, 160);
+      ctx.moveTo(512, 240);
+      ctx.lineTo(512, 360);
+      ctx.lineTo(760, 360);
+      ctx.stroke();
+
+      // Nodes
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(100, 180, 140, 120);
+      ctx.strokeRect(100, 180, 140, 120);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px "Roboto Mono", monospace';
+      ctx.fillText('API GATEWAY', 115, 230);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '13px "Roboto Mono", monospace';
+      ctx.fillText('Load Balancer', 115, 260);
+
+      ctx.fillStyle = '#102847';
+      ctx.fillRect(432, 180, 160, 120);
+      ctx.strokeRect(432, 180, 160, 120);
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('[AETHER CORE]', 448, 225);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '13px "Roboto Mono", monospace';
+      ctx.fillText('Rust / gRPC', 452, 255);
+
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(740, 100, 160, 110);
+      ctx.strokeRect(740, 100, 160, 110);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 15px "Roboto Mono", monospace';
+      ctx.fillText('GLOBAL REPLICAS', 755, 145);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px "Roboto Mono", monospace';
+      ctx.fillText('Kafka / Redis', 760, 175);
+    } else if (this.currentProjectIndex === 1) {
+      // --- Project 2: AI DAG Workflow Engine ---
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2.5;
+
+      // DAG Nodes
+      const nodes = [
+        { label: 'PROMPT PARSER', x: 120, y: 220, color: '#38bdf8' },
+        { label: 'PLANNER AGENT', x: 380, y: 140, color: '#c084fc' },
+        { label: 'CODE EXECUTOR', x: 380, y: 300, color: '#4ade80' },
+        { label: 'VERIFICATION GATE', x: 680, y: 220, color: '#facc15' },
+      ];
+
+      // Draw connecting lines
+      ctx.beginPath();
+      ctx.moveTo(250, 250);
+      ctx.lineTo(380, 170);
+      ctx.moveTo(250, 250);
+      ctx.lineTo(380, 330);
+      ctx.moveTo(510, 170);
+      ctx.lineTo(680, 250);
+      ctx.moveTo(510, 330);
+      ctx.lineTo(680, 250);
+      ctx.stroke();
+
+      nodes.forEach(n => {
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(n.x, n.y, 160, 70);
+        ctx.strokeStyle = n.color;
+        ctx.strokeRect(n.x, n.y, 160, 70);
+        ctx.fillStyle = n.color;
+        ctx.font = 'bold 13px "Roboto Mono", monospace';
+        ctx.fillText(n.label, n.x + 14, n.y + 40);
+      });
+    } else {
+      // --- Project 3: FinTech GPU Telemetry Terminal ---
+      ctx.fillStyle = '#0a1122';
+      ctx.fillRect(80, 100, 864, 320);
+      ctx.strokeStyle = '#1e293b';
+      ctx.strokeRect(80, 100, 864, 320);
+
+      // Candlestick simulated bars
+      const candleColors = ['#22c55e', '#ef4444', '#22c55e', '#22c55e', '#ef4444', '#22c55e'];
+      for (let i = 0; i < 24; i++) {
+        const cx = 120 + i * 34;
+        const cy = 240 + Math.sin(i * 0.8 + this.animTimer) * 60;
+        const h = 20 + Math.abs(Math.sin(i)) * 40;
+        const isUp = i % 3 !== 1;
+        ctx.fillStyle = isUp ? '#22c55e' : '#ef4444';
+        ctx.fillRect(cx, cy, 18, h);
+      }
+    }
+
+    // Bottom Metric Strip
+    ctx.fillStyle = '#081224';
+    ctx.fillRect(40, 460, 944, 70);
+    ctx.strokeStyle = '#1e293b';
+    ctx.strokeRect(40, 460, 944, 70);
+    ctx.fillStyle = '#4ade80';
+    ctx.font = 'bold 15px "Roboto Mono", monospace';
+    ctx.fillText(`● IMPACT: ${proj.impact}`, 70, 502);
+
+    this.archTexture.needsUpdate = true;
+  }
+
+  private renderLaptopScreen(): void {
+    const ctx = this.laptopCtx;
+    ctx.fillStyle = '#070913';
+    ctx.fillRect(0, 0, 512, 320);
+
+    ctx.fillStyle = '#0f1424';
+    ctx.fillRect(0, 0, 512, 28);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px "Roboto Mono", monospace';
+    ctx.fillText('shubham@workstation — prod', 16, 18);
+
+    const logs = [
+      `$ inspect ${PROJECTS[this.currentProjectIndex].id}`,
+      'Status: Verified Production Deployment',
+      `Stack: ${PROJECTS[this.currentProjectIndex].tech.slice(0, 3).join(', ')}`,
+      'All health probes passing [200 OK]',
     ];
 
-    ctx2.font = '19px "Roboto Mono", monospace';
-    terminalLogs.forEach((log, i) => {
-      const y = startY + i * 44;
-      ctx2.fillStyle = log.col;
-      ctx2.fillText(log.tag, 24, y);
-      ctx2.fillStyle = '#cbd5e1';
-      ctx2.fillText(log.text, 140, y);
+    ctx.font = '14px "Roboto Mono", monospace';
+    logs.forEach((log, i) => {
+      ctx.fillStyle = log.startsWith('$') ? '#38bdf8' : (log.includes('Verified') ? '#4ade80' : '#cbd5e1');
+      ctx.fillText(log, 16, 64 + i * 38);
     });
 
-    // Metric bar at bottom
-    ctx2.fillStyle = '#111524';
-    ctx2.fillRect(24, 460, 976, 70);
-    ctx2.strokeStyle = '#272d4a';
-    ctx2.strokeRect(24, 460, 976, 70);
-
-    ctx2.font = 'bold 16px "Roboto Mono", monospace';
-    ctx2.fillStyle = '#6366f1';
-    ctx2.fillText('● SYSTEM INTEGRITY: 100%', 48, 502);
-    ctx2.fillStyle = '#38bdf8';
-    ctx2.fillText('MEMORY: OPTIMAL', 360, 502);
-    ctx2.fillStyle = '#4ade80';
-    ctx2.fillText('STORY ENGINE: ARMED', 660, 502);
-
-    this.terminalTexture.needsUpdate = true;
+    this.laptopTexture.needsUpdate = true;
   }
 
   public update(deltaTime: number): void {
     this.blinkTimer += deltaTime;
+    this.animTimer += deltaTime * 2;
     if (this.blinkTimer > 0.55) {
       this.blinkTimer = 0;
-      const showCursor = Math.random() > 0.3;
-      this.renderScreens(showCursor);
+      this.renderAllScreens(Math.random() > 0.35);
     }
   }
 
   public dispose(): void {
     this.codeTexture.dispose();
-    this.terminalTexture.dispose();
+    this.archTexture.dispose();
+    this.laptopTexture.dispose();
 
     for (const geometry of this.geometries) {
       geometry.dispose();

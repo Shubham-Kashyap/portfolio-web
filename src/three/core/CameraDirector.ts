@@ -6,17 +6,23 @@ export interface ShotKeyframe {
   fov: number;
 }
 
-// Cinematic keyframes for Scene 01 and Transition 01
-export const SHOT_ESTABLISHING: ShotKeyframe = {
+// Keyframes across Scene 01, Scene 02, and Scene 03
+export const SHOT_SCENE_01: ShotKeyframe = {
   position: new THREE.Vector3(0.9, 2.7, 7.6),
   target: new THREE.Vector3(0, 1.35, -0.5),
   fov: 42,
 };
 
-export const SHOT_WORKSTATION_FOCUS: ShotKeyframe = {
-  position: new THREE.Vector3(-0.45, 1.72, 2.6),
-  target: new THREE.Vector3(-0.3, 1.48, -1.05),
-  fov: 38,
+export const SHOT_SCENE_02: ShotKeyframe = {
+  position: new THREE.Vector3(0.1, 2.1, 4.4),
+  target: new THREE.Vector3(0.2, 1.45, -0.8),
+  fov: 40,
+};
+
+export const SHOT_SCENE_03_PROJECTS: ShotKeyframe = {
+  position: new THREE.Vector3(-0.65, 1.72, 2.6),
+  target: new THREE.Vector3(0.3, 1.52, -1.1),
+  fov: 36,
 };
 
 export default class CameraDirector {
@@ -24,14 +30,13 @@ export default class CameraDirector {
   private desiredPosition: THREE.Vector3;
   private desiredTarget: THREE.Vector3;
 
-  // Mouse parallax offset vectors
   private parallaxOffset: THREE.Vector2;
   private currentParallax: THREE.Vector2;
 
   constructor(private camera: THREE.PerspectiveCamera) {
-    this.currentTarget = SHOT_ESTABLISHING.target.clone();
-    this.desiredPosition = SHOT_ESTABLISHING.position.clone();
-    this.desiredTarget = SHOT_ESTABLISHING.target.clone();
+    this.currentTarget = SHOT_SCENE_01.target.clone();
+    this.desiredPosition = SHOT_SCENE_01.position.clone();
+    this.desiredTarget = SHOT_SCENE_01.target.clone();
 
     this.parallaxOffset = new THREE.Vector2(0, 0);
     this.currentParallax = new THREE.Vector2(0, 0);
@@ -40,54 +45,37 @@ export default class CameraDirector {
     this.camera.lookAt(this.currentTarget);
   }
 
-  /**
-   * Updates desired camera parameters based on scroll progress [0..1]
-   */
   public setScrollProgress(progress: number): void {
-    const t = THREE.MathUtils.clamp(progress, 0, 1);
-    
-    // Smooth cubic ease for natural cinematic deceleration
-    const easeT = t * t * (3 - 2 * t);
+    const p = THREE.MathUtils.clamp(progress, 0, 1);
 
-    this.desiredPosition.lerpVectors(
-      SHOT_ESTABLISHING.position,
-      SHOT_WORKSTATION_FOCUS.position,
-      easeT
-    );
+    if (p < 0.45) {
+      // Interpolate from Scene 01 (Establishing) to Scene 02 (Approaching)
+      const t = p / 0.45;
+      const easeT = t * t * (3 - 2 * t);
 
-    this.desiredTarget.lerpVectors(
-      SHOT_ESTABLISHING.target,
-      SHOT_WORKSTATION_FOCUS.target,
-      easeT
-    );
+      this.desiredPosition.lerpVectors(SHOT_SCENE_01.position, SHOT_SCENE_02.position, easeT);
+      this.desiredTarget.lerpVectors(SHOT_SCENE_01.target, SHOT_SCENE_02.target, easeT);
+      this.camera.fov = THREE.MathUtils.lerp(SHOT_SCENE_01.fov, SHOT_SCENE_02.fov, easeT);
+    } else {
+      // Interpolate into Scene 03 (Project Display)
+      const t = (p - 0.45) / 0.55;
+      const easeT = t * t * (3 - 2 * t);
 
-    const targetFov = THREE.MathUtils.lerp(
-      SHOT_ESTABLISHING.fov,
-      SHOT_WORKSTATION_FOCUS.fov,
-      easeT
-    );
-
-    if (Math.abs(this.camera.fov - targetFov) > 0.05) {
-      this.camera.fov = targetFov;
-      this.camera.updateProjectionMatrix();
+      this.desiredPosition.lerpVectors(SHOT_SCENE_02.position, SHOT_SCENE_03_PROJECTS.position, easeT);
+      this.desiredTarget.lerpVectors(SHOT_SCENE_02.target, SHOT_SCENE_03_PROJECTS.target, easeT);
+      this.camera.fov = THREE.MathUtils.lerp(SHOT_SCENE_02.fov, SHOT_SCENE_03_PROJECTS.fov, easeT);
     }
+
+    this.camera.updateProjectionMatrix();
   }
 
-  /**
-   * Sets subtle normalized pointer coordinates [-1..1] for gentle depth parallax
-   */
   public setPointer(x: number, y: number): void {
-    this.parallaxOffset.set(x * 0.12, y * 0.08);
+    this.parallaxOffset.set(x * 0.1, y * 0.07);
   }
 
-  /**
-   * Smoothly interpolates camera position and lookAt target every frame
-   */
   public update(dampingFactor: number = 0.05): void {
-    // Smooth parallax interpolation
     this.currentParallax.lerp(this.parallaxOffset, dampingFactor);
 
-    // Apply smooth position follow with parallax
     const finalX = this.desiredPosition.x + this.currentParallax.x;
     const finalY = this.desiredPosition.y + this.currentParallax.y;
     const finalZ = this.desiredPosition.z;
@@ -96,7 +84,6 @@ export default class CameraDirector {
     this.camera.position.y += (finalY - this.camera.position.y) * dampingFactor;
     this.camera.position.z += (finalZ - this.camera.position.z) * dampingFactor;
 
-    // Smooth target follow
     this.currentTarget.lerp(this.desiredTarget, dampingFactor);
     this.camera.lookAt(this.currentTarget);
   }

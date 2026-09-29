@@ -5,11 +5,18 @@ import SceneManager from '@/three/core/SceneManager';
 
 interface ThreeCanvasProps {
   onScrollProgress?: (progress: number) => void;
+  selectedProject?: number;
 }
 
-export default function ThreeCanvas({ onScrollProgress }: ThreeCanvasProps) {
+export default function ThreeCanvas({ onScrollProgress, selectedProject }: ThreeCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
+
+  useEffect(() => {
+    if (selectedProject !== undefined && sceneManagerRef.current) {
+      sceneManagerRef.current.setProject(selectedProject);
+    }
+  }, [selectedProject]);
 
   useEffect(() => {
     if (!containerRef.current) return;
