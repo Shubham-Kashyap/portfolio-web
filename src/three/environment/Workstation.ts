@@ -8,6 +8,7 @@ const LAPTOP_CHASSIS_COLOR = 0x1b1f2b;
 export interface ProjectData {
   id: string;
   name: string;
+  company: string;
   category: string;
   problem: string;
   solution: string;
@@ -16,36 +17,82 @@ export interface ProjectData {
   impact: string;
 }
 
+export const RESUME_PROFILE = {
+  name: 'Shubham Kashyap',
+  title: 'Senior Software Engineer',
+  experience: '6+ Years Experience',
+  companies: '4 Companies',
+  appsShipped: '14+ Production Applications Shipped',
+  email: 'shubhamkashyap3026@gmail.com',
+  phone: '+91 7087312507',
+  summary:
+    'Software engineer with 6+ years of experience designing high-scale search and API systems in Node.js and NestJS — including an Elasticsearch overhaul that cut asset retrieval time 60% and reduced unanswered search queries 75%. Ships production frontend in React/Next.js and Angular, recently owning a real-time platform through peak FIFA World Cup traffic.',
+  coreSkills: [
+    'TypeScript',
+    'Node.js',
+    'NestJS',
+    'Next.js',
+    'React.js',
+    'Elasticsearch',
+    'AWS (Lambda, S3, SQS)',
+    'PostgreSQL',
+    'Docker',
+    'AI / RAG Pipelines',
+  ],
+};
+
 export const PROJECTS: ProjectData[] = [
   {
-    id: 'aether-engine',
-    name: 'AETHER ENGINE',
-    category: 'Cloud Infrastructure / Distributed Systems',
-    problem: 'High cross-region replication latency and inconsistent state synchronization in global microservices.',
-    solution: 'Engineered a decentralized edge mesh network utilizing zero-copy protocols and optimistic consensus verification.',
-    tech: ['Rust', 'TypeScript', 'gRPC', 'Redis', 'Kafka', 'Docker'],
-    role: 'Lead Systems Architect',
-    impact: '85% drop in cross-region latency, 1.4M events/sec throughput with 99.999% uptime.',
+    id: 'goatzone',
+    name: 'Goatzone — FIFA World Cup Platform',
+    company: 'Trigma Solutions Pvt Ltd (Mar 2026 – Present)',
+    category: 'High-Throughput Real-Time Systems',
+    problem:
+      'Extreme live knockout traffic spikes during the FIFA World Cup and a 24-zone betting exposure gap where users could enter up to 18 zones simultaneously.',
+    solution:
+      'Engineered and launched platform in a ~6-week deadline; integrated Sportradar feeds, established entry limits to eliminate exposure gaps, and stabilized live settlement pipelines.',
+    tech: ['Node.js', 'Redis', 'WebSockets', 'Sportradar API', 'AWS EC2', 'Docker'],
+    role: 'Sr. Full Stack Developer',
+    impact: 'Zero settlement failures during peak World Cup knockout stages, eliminated platform risk across 24 zones.',
   },
   {
-    id: 'synapse-ai',
-    name: 'SYNAPSE WORKFLOW OS',
-    category: 'Autonomous AI Orchestration',
-    problem: 'Multi-agent LLM systems failing unpredictably without verifiable state machines or audit checkpoints.',
-    solution: 'Designed a deterministic directed acyclic graph (DAG) runtime with sandboxed execution and self-healing memory pools.',
-    tech: ['Next.js', 'TypeScript', 'Python', 'Vector DB', 'PostgreSQL', 'Tailwind'],
-    role: 'Full-Stack & AI Engineer',
-    impact: '99.4% task completion rate, automating 400+ complex workflows across enterprise pipelines.',
+    id: 'sparkfive',
+    name: 'SparkFive — Enterprise DAM Platform',
+    company: 'VT Netzwelt Pvt Ltd (Oct 2022 – Jan 2025)',
+    category: 'Large-Scale Search & Media Ingestion',
+    problem:
+      'Sluggish asset retrieval across millions of enterprise files, 75% unanswered search queries, and >1GB media uploads stalling for over 90 seconds.',
+    solution:
+      'Architected new Elasticsearch indexing and query optimization strategy; designed an asynchronous S3 multipart pipeline using AWS Lambda + SQS.',
+    tech: ['Elasticsearch', 'Node.js', 'React.js', 'AWS Lambda', 'AWS S3', 'AWS SQS'],
+    role: 'Software Engineer (Architecture Lead)',
+    impact: 'Cut asset retrieval time 60%, reduced unanswered searches 75%, and slashed >1GB upload time from 90s to 8–10s.',
   },
   {
-    id: 'nebula-fin',
-    name: 'NEBULA TRADING TERMINAL',
-    category: 'High-Frequency FinTech Platform',
-    problem: 'Laggy charting engines and websocket bottlenecks causing execution slippage during peak market volatility.',
-    solution: 'Built a GPU-accelerated WebGL telemetry visualizer and sub-millisecond order execution gateway.',
-    tech: ['TypeScript', 'WebGL', 'Three.js', 'WebSockets', 'RxJS', 'Node.js'],
-    role: 'Principal Frontend Architect',
-    impact: 'Sub-2ms render loop, processing $18M+ in daily transaction volume with zero frame drops.',
+    id: 'forvia',
+    name: 'Forvia — AI Collaborative Car Design',
+    company: 'Programming.com LLP (Mar 2025 – Jan 2026)',
+    category: 'Real-Time Collaborative AI Canvas',
+    problem:
+      'Inherited complex AI-generated codebase with degraded Core Web Vitals (LCP, FID) and high onboarding friction in multi-user real-time canvas interactions.',
+    solution:
+      'Stabilized userflows across real-time design canvases using Next.js, Tldraw, and TypeScript; applied code-splitting, lazy loading, and mentored junior engineers.',
+    tech: ['Next.js', 'TypeScript', 'Tldraw', 'React', 'Tailwind', 'AI Pipelines'],
+    role: 'Sr. Software Developer',
+    impact: 'Cut onboarding friction ~20%, optimized Core Web Vitals to green scores, and stabilized real-time multi-user design sessions.',
+  },
+  {
+    id: 'clickroof',
+    name: 'ClickRoof — One-Click Roofing SaaS',
+    company: 'VT Netzwelt Pvt Ltd (Oct 2022 – Jan 2025)',
+    category: 'Modular Enterprise SaaS & Automation',
+    problem:
+      'Manual operational overhead in roofing contractor workflows and recurring API-level production errors under growing customer load.',
+    solution:
+      'Architected modular NestJS backend services with robust validation, clean architecture, and built a centralized administrative operations suite.',
+    tech: ['NestJS', 'Next.js', 'TypeScript', 'MySQL', 'Docker', 'REST APIs'],
+    role: 'Full Lifecycle Software Engineer',
+    impact: 'Reduced API-related production issues 30% and cut manual operational effort 25–30%.',
   },
 ];
 
@@ -182,7 +229,7 @@ export default class Workstation {
     stand1.position.set(-0.82, 1.25, -0.42);
     this.group.add(stand1);
 
-    // Monitor 2 (Right - Active Project Showcase)
+    // Monitor 2 (Right - Architecture & Project Preview)
     const mon2Group = new THREE.Group();
     mon2Group.add(new THREE.Mesh(bodyGeo, bezelMat));
     const screen2 = new THREE.Mesh(screenGeo, this.archScreenMaterial);
@@ -263,31 +310,36 @@ export default class Workstation {
     ctx.fillStyle = '#111726';
     ctx.fillRect(0, 0, 1024, 48);
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(16, 8, 240, 34);
+    ctx.fillRect(16, 8, 260, 34);
     ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(16, 40, 240, 2);
+    ctx.fillRect(16, 40, 260, 2);
 
     ctx.font = 'bold 18px "Roboto Mono", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${PROJECTS[this.currentProjectIndex].id}.core.ts`, 36, 30);
 
-    const currentProj = PROJECTS[this.currentProjectIndex];
+    const proj = PROJECTS[this.currentProjectIndex];
+    ctx.fillText(`${proj.id}.service.ts`, 36, 30);
+
+    // Realistic production code matching Shubham's actual stack
     const codeLines = [
-      { num: '01', tokens: [{ text: 'import', col: '#c084fc' }, { text: ` { ${currentProj.name.replace(/\s+/g, '')} } `, col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "@/architecture";', col: '#38bdf8' }] },
-      { num: '02', tokens: [{ text: 'export class ', col: '#60a5fa' }, { text: 'ProductionPipeline ', col: '#facc15' }, { text: '{', col: '#e2e8f0' }] },
-      { num: '03', tokens: [{ text: '  readonly status = ', col: '#60a5fa' }, { text: '"OPERATIONAL";', col: '#4ade80' }] },
-      { num: '04', tokens: [{ text: `  readonly impact = "${currentProj.impact.slice(0, 42)}...";`, col: '#94a3b8' }] },
-      { num: '05', tokens: [{ text: '  async execute(): Promise<Metrics> {', col: '#e2e8f0' }] },
-      { num: '06', tokens: [{ text: '    const nodes = await Mesh.discoverEndpoints();', col: '#94a3b8' }] },
-      { num: '07', tokens: [{ text: '    return await this.dispatch(nodes);', col: '#94a3b8' }] },
-      { num: '08', tokens: [{ text: '  }', col: '#e2e8f0' }] },
-      { num: '09', tokens: [{ text: '}', col: '#e2e8f0' }] },
+      { num: '01', tokens: [{ text: 'import', col: '#c084fc' }, { text: ' { Injectable, Logger } ', col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "@nestjs/common";', col: '#38bdf8' }] },
+      { num: '02', tokens: [{ text: 'import', col: '#c084fc' }, { text: ' { ElasticsearchService } ', col: '#e2e8f0' }, { text: 'from', col: '#c084fc' }, { text: ' "@nestjs/elasticsearch";', col: '#38bdf8' }] },
+      { num: '03', tokens: [] },
+      { num: '04', tokens: [{ text: '@Injectable()', col: '#facc15' }] },
+      { num: '05', tokens: [{ text: 'export class ', col: '#60a5fa' }, { text: 'HighScaleSearchEngine ', col: '#facc15' }, { text: '{', col: '#e2e8f0' }] },
+      { num: '06', tokens: [{ text: '  constructor(private readonly es: ElasticsearchService) {}', col: '#94a3b8' }] },
+      { num: '07', tokens: [] },
+      { num: '08', tokens: [{ text: '  async executeOptimizedSearch', col: '#38bdf8' }, { text: '(query: ', col: '#e2e8f0' }, { text: 'SearchPayload', col: '#facc15' }, { text: ') {', col: '#e2e8f0' }] },
+      { num: '09', tokens: [{ text: '    // 60% faster asset retrieval + 75% query miss reduction', col: '#4ade80' }] },
+      { num: '10', tokens: [{ text: '    return await this.es.search({ index: "dam_assets_v2", query });', col: '#e2e8f0' }] },
+      { num: '11', tokens: [{ text: '  }', col: '#e2e8f0' }] },
+      { num: '12', tokens: [{ text: '}', col: '#e2e8f0' }] },
     ];
 
     ctx.font = '20px "Roboto Mono", monospace';
     const startY = 96;
     codeLines.forEach((line, index) => {
-      const y = startY + index * 40;
+      const y = startY + index * 38;
       ctx.fillStyle = '#334155';
       ctx.fillText(line.num, 24, y);
 
@@ -298,7 +350,7 @@ export default class Workstation {
         currentX += ctx.measureText(token.text).width;
       });
 
-      if (line.num === '07' && showCursor) {
+      if (line.num === '10' && showCursor) {
         ctx.fillStyle = '#38bdf8';
         ctx.fillRect(currentX + 6, y - 22, 10, 26);
       }
@@ -319,104 +371,156 @@ export default class Workstation {
     ctx.fillRect(0, 0, 1024, 48);
     ctx.font = 'bold 18px "Roboto Mono", monospace';
     ctx.fillStyle = '#2dd4bf';
-    ctx.fillText(`LIVE PROJECT PREVIEW [${this.currentProjectIndex + 1}/3] // ${proj.name}`, 36, 30);
+    ctx.fillText(`PRODUCTION SYSTEM [${this.currentProjectIndex + 1}/${PROJECTS.length}] // ${proj.name}`, 36, 30);
 
     if (this.currentProjectIndex === 0) {
-      // --- Project 1: Cloud Mesh Architecture Network Map ---
+      // --- Goatzone: FIFA Real-Time Odds & Exposure Matrix ---
       ctx.strokeStyle = '#22d3ee';
       ctx.lineWidth = 2.5;
 
+      // Real-time Match & Exposure Dashboard
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(80, 90, 400, 150);
+      ctx.strokeRect(80, 90, 400, 150);
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('FIFA WORLD CUP LIVE FEED', 100, 130);
+      ctx.fillStyle = '#4ade80';
+      ctx.font = '14px "Roboto Mono", monospace';
+      ctx.fillText('● Sportradar Stream: ACTIVE', 100, 165);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('Latency: 14ms | Knockout Phase', 100, 195);
+
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(520, 90, 420, 150);
+      ctx.strokeRect(520, 90, 420, 150);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('24-ZONE BETTING RISK CONTROLS', 540, 130);
+      ctx.fillStyle = '#f87171';
+      ctx.font = '14px "Roboto Mono", monospace';
+      ctx.fillText('Exposure Gap: RESOLVED (Max 18 limits)', 540, 165);
+      ctx.fillStyle = '#4ade80';
+      ctx.fillText('Settlement Integrity: 100.0%', 540, 195);
+
+      // Real-time Traffic Graph
+      ctx.fillStyle = '#0a1324';
+      ctx.fillRect(80, 265, 860, 165);
+      ctx.strokeStyle = '#1e293b';
+      ctx.strokeRect(80, 265, 860, 165);
+
+      ctx.strokeStyle = '#38bdf8';
       ctx.beginPath();
-      ctx.moveTo(220, 240);
-      ctx.lineTo(512, 240);
-      ctx.lineTo(512, 160);
-      ctx.lineTo(760, 160);
-      ctx.moveTo(512, 240);
-      ctx.lineTo(512, 360);
-      ctx.lineTo(760, 360);
+      for (let i = 0; i < 28; i++) {
+        const x = 110 + i * 29;
+        const y = 370 - Math.abs(Math.sin(i * 0.4 + this.animTimer)) * 80;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
       ctx.stroke();
 
-      // Nodes
-      ctx.fillStyle = '#0e1e38';
-      ctx.fillRect(100, 180, 140, 120);
-      ctx.strokeRect(100, 180, 140, 120);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 15px "Roboto Mono", monospace';
-      ctx.fillText('API GATEWAY', 115, 230);
       ctx.fillStyle = '#38bdf8';
       ctx.font = '13px "Roboto Mono", monospace';
-      ctx.fillText('Load Balancer', 115, 260);
-
-      ctx.fillStyle = '#102847';
-      ctx.fillRect(432, 180, 160, 120);
-      ctx.strokeRect(432, 180, 160, 120);
-      ctx.fillStyle = '#22d3ee';
-      ctx.font = 'bold 16px "Roboto Mono", monospace';
-      ctx.fillText('[AETHER CORE]', 448, 225);
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '13px "Roboto Mono", monospace';
-      ctx.fillText('Rust / gRPC', 452, 255);
-
-      ctx.fillStyle = '#0e1e38';
-      ctx.fillRect(740, 100, 160, 110);
-      ctx.strokeRect(740, 100, 160, 110);
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 15px "Roboto Mono", monospace';
-      ctx.fillText('GLOBAL REPLICAS', 755, 145);
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '13px "Roboto Mono", monospace';
-      ctx.fillText('Kafka / Redis', 760, 175);
+      ctx.fillText('PEAK KNOCKOUT STAGE TRAFFIC — ZERO DROPPED BETS', 100, 295);
     } else if (this.currentProjectIndex === 1) {
-      // --- Project 2: AI DAG Workflow Engine ---
-      ctx.strokeStyle = '#a855f7';
+      // --- SparkFive: Elasticsearch & AWS Lambda S3 Architecture ---
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2.5;
 
-      // DAG Nodes
-      const nodes = [
-        { label: 'PROMPT PARSER', x: 120, y: 220, color: '#38bdf8' },
-        { label: 'PLANNER AGENT', x: 380, y: 140, color: '#c084fc' },
-        { label: 'CODE EXECUTOR', x: 380, y: 300, color: '#4ade80' },
-        { label: 'VERIFICATION GATE', x: 680, y: 220, color: '#facc15' },
-      ];
+      // Node 1: S3 Upload Pipeline
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(80, 120, 240, 130);
+      ctx.strokeRect(80, 120, 240, 130);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 15px "Roboto Mono", monospace';
+      ctx.fillText('AWS S3 + SQS', 100, 160);
+      ctx.fillStyle = '#4ade80';
+      ctx.font = '13px "Roboto Mono", monospace';
+      ctx.fillText('Parallel Lambda Ingestion', 100, 190);
+      ctx.fillText('>1GB: 90s → 8-10s', 100, 215);
 
-      // Draw connecting lines
+      // Connecting Arrow
       ctx.beginPath();
-      ctx.moveTo(250, 250);
-      ctx.lineTo(380, 170);
-      ctx.moveTo(250, 250);
-      ctx.lineTo(380, 330);
-      ctx.moveTo(510, 170);
-      ctx.lineTo(680, 250);
-      ctx.moveTo(510, 330);
-      ctx.lineTo(680, 250);
+      ctx.moveTo(320, 185);
+      ctx.lineTo(440, 185);
       ctx.stroke();
 
-      nodes.forEach(n => {
-        ctx.fillStyle = '#111827';
-        ctx.fillRect(n.x, n.y, 160, 70);
-        ctx.strokeStyle = n.color;
-        ctx.strokeRect(n.x, n.y, 160, 70);
-        ctx.fillStyle = n.color;
-        ctx.font = 'bold 13px "Roboto Mono", monospace';
-        ctx.fillText(n.label, n.x + 14, n.y + 40);
-      });
-    } else {
-      // --- Project 3: FinTech GPU Telemetry Terminal ---
-      ctx.fillStyle = '#0a1122';
+      // Node 2: Central Elasticsearch Cluster
+      ctx.fillStyle = '#102847';
+      ctx.fillRect(440, 100, 280, 170);
+      ctx.strokeRect(440, 100, 280, 170);
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('ELASTICSEARCH V2', 460, 145);
+      ctx.fillStyle = '#4ade80';
+      ctx.font = '14px "Roboto Mono", monospace';
+      ctx.fillText('Retrieval: -60% Latency', 460, 180);
+      ctx.fillText('Zero-Results: -75% Drop', 460, 210);
+
+      // Node 3: React DAM Client
+      ctx.beginPath();
+      ctx.moveTo(720, 185);
+      ctx.lineTo(820, 185);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0e1e38';
+      ctx.fillRect(820, 120, 140, 130);
+      ctx.strokeRect(820, 120, 140, 130);
+      ctx.fillStyle = '#c084fc';
+      ctx.font = 'bold 14px "Roboto Mono", monospace';
+      ctx.fillText('REACT DAM', 835, 165);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px "Roboto Mono", monospace';
+      ctx.fillText('Fast Filtering', 835, 195);
+    } else if (this.currentProjectIndex === 2) {
+      // --- Forvia: Real-Time Collaborative Canvas ---
+      ctx.fillStyle = '#0a1224';
       ctx.fillRect(80, 100, 864, 320);
-      ctx.strokeStyle = '#1e293b';
+      ctx.strokeStyle = '#22d3ee';
       ctx.strokeRect(80, 100, 864, 320);
 
-      // Candlestick simulated bars
-      const candleColors = ['#22c55e', '#ef4444', '#22c55e', '#22c55e', '#ef4444', '#22c55e'];
-      for (let i = 0; i < 24; i++) {
-        const cx = 120 + i * 34;
-        const cy = 240 + Math.sin(i * 0.8 + this.animTimer) * 60;
-        const h = 20 + Math.abs(Math.sin(i)) * 40;
-        const isUp = i % 3 !== 1;
-        ctx.fillStyle = isUp ? '#22c55e' : '#ef4444';
-        ctx.fillRect(cx, cy, 18, h);
-      }
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('FORVIA // TLDRW REAL-TIME MULTI-USER CAR DESIGN', 110, 145);
+
+      // Simulated multi-cursor design wires
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(180, 180, 240, 140);
+      ctx.strokeStyle = '#22c55e';
+      ctx.strokeRect(480, 180, 280, 140);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '14px "Roboto Mono", monospace';
+      ctx.fillText('Chassis Aerodynamics', 200, 240);
+      ctx.fillText('AI Generative Specs', 500, 240);
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillText('▲ User_01 (Paris)', 240, 170);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('▲ Shubham (Mohali)', 540, 170);
+    } else {
+      // --- ClickRoof: NestJS Modular Microservices ---
+      ctx.fillStyle = '#0a1224';
+      ctx.fillRect(80, 100, 864, 320);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeRect(80, 100, 864, 320);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 16px "Roboto Mono", monospace';
+      ctx.fillText('CLICKROOF // NESTJS MODULAR ROOFING ARCHITECTURE', 110, 145);
+
+      const modules = ['CONTRACTOR_SRV', 'ESTIMATION_ENGINE', 'ADMIN_PORTAL', 'PAYMENT_GATEWAY'];
+      modules.forEach((mod, idx) => {
+        const x = 110 + idx * 205;
+        ctx.fillStyle = '#101a32';
+        ctx.fillRect(x, 190, 180, 90);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeRect(x, 190, 180, 90);
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 13px "Roboto Mono", monospace';
+        ctx.fillText(mod, x + 15, 240);
+      });
     }
 
     // Bottom Metric Strip
@@ -440,19 +544,21 @@ export default class Workstation {
     ctx.fillRect(0, 0, 512, 28);
     ctx.fillStyle = '#64748b';
     ctx.font = '12px "Roboto Mono", monospace';
-    ctx.fillText('shubham@workstation — prod', 16, 18);
+    ctx.fillText('shubham@workstation — prod-cluster', 16, 18);
 
+    const proj = PROJECTS[this.currentProjectIndex];
     const logs = [
-      `$ inspect ${PROJECTS[this.currentProjectIndex].id}`,
-      'Status: Verified Production Deployment',
-      `Stack: ${PROJECTS[this.currentProjectIndex].tech.slice(0, 3).join(', ')}`,
-      'All health probes passing [200 OK]',
+      `$ git status — ${proj.id}`,
+      `Org: ${proj.company.split('(')[0].trim()}`,
+      `Role: ${proj.role}`,
+      `Stack: ${proj.tech.slice(0, 4).join(', ')}`,
+      'Status: 100% Verified in Production',
     ];
 
     ctx.font = '14px "Roboto Mono", monospace';
     logs.forEach((log, i) => {
       ctx.fillStyle = log.startsWith('$') ? '#38bdf8' : (log.includes('Verified') ? '#4ade80' : '#cbd5e1');
-      ctx.fillText(log, 16, 64 + i * 38);
+      ctx.fillText(log, 16, 58 + i * 36);
     });
 
     this.laptopTexture.needsUpdate = true;

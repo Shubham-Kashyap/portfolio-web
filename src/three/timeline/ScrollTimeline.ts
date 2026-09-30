@@ -1,5 +1,6 @@
 import CameraDirector from '../core/CameraDirector';
 import HeroScene from '../scenes/HeroScene';
+import { PROJECTS } from '../environment/Workstation';
 
 export default class ScrollTimeline {
   private currentProgress = 0;
@@ -28,14 +29,12 @@ export default class ScrollTimeline {
     this.heroScene.setTimelineProgress(this.currentProgress);
 
     // Auto-switch project on the workstation monitor when scrolling through Scene 03
-    if (this.currentProgress >= 0.60) {
-      const projectSlice = (this.currentProgress - 0.60) / 0.40;
-      let projectIndex = 0;
-      if (projectSlice >= 0.66) {
-        projectIndex = 2;
-      } else if (projectSlice >= 0.33) {
-        projectIndex = 1;
-      }
+    if (this.currentProgress >= 0.58) {
+      const projectSlice = Math.max(0, Math.min(0.999, (this.currentProgress - 0.58) / 0.42));
+      const projectIndex = Math.min(
+        PROJECTS.length - 1,
+        Math.floor(projectSlice * PROJECTS.length)
+      );
 
       if (projectIndex !== this.activeProject) {
         this.activeProject = projectIndex;
